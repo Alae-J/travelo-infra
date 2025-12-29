@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: travelo
+spec:
+  selector:
+    app: travelo-frontend
+  ports:
+    - port: 80
+      targetPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: travelo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: travelo-frontend
+  template:
+    metadata:
+      labels:
+        app: travelo-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: alaej/travelo-frontend:latest
+          ports:
+            - containerPort: 3000
+          # --- Probes ---
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"

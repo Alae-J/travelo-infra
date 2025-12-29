@@ -1,0 +1,10 @@
+# readonly-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: readonly-role
+  namespace: travelo
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services"]
+  verbs: ["get","list"]
