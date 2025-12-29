@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: travelo-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Replace this with your Git repo URL that contains the k8s/ folder
+    repoURL: "https://github.com/yassinelamsaaf/travelo-infra.git"
+    targetRevision: main
+    path: travelo-k8s
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: travelo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
