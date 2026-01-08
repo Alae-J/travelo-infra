@@ -50,6 +50,8 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-root-password
+            - name: CORS_ALLOWED_ORIGINS
+              value: http://localhost,http://frontend.exam.local
           readinessProbe:
             httpGet:
               path: /api/hello
