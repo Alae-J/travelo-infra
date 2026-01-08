@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: alaej/travelo-frontend:latest
+          image: alaej/travelo-frontend:344e52e32310a9c45c62e057aa8959ce15f7c8ea
           env:
             - name: REACT_APP_BACKEND_URL
               value: http://localhost
