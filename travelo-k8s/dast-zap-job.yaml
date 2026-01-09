@@ -1,0 +1,120 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dast-zap-scan
+  namespace: travelo
+  labels:
+    app: security-testing
+    scan-type: dast
+spec:
+  ttlSecondsAfterFinished: 3600  # Auto-cleanup after 1 hour
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: security-testing
+        scan-type: dast
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command:
+          - /bin/bash
+          - -c
+          - |
+            echo "Starting DAST scan of Travelo application..."
+            echo "Target: http://frontend:80 (internal K8s service)"
+
+            # Run baseline scan against frontend service
+            zap-baseline.py \
+              -t http://frontend:80 \
+              -r /zap/wrk/report.html \
+              -w /zap/wrk/report.md \
+              -J /zap/wrk/report.json \
+              -a || true
+
+            # Also scan backend API
+            echo ""
+            echo "Scanning backend API at http://backend:8080/api"
+            zap-baseline.py \
+              -t http://backend:8080/api \
+              -r /zap/wrk/report-api.html \
+              -w /zap/wrk/report-api.md \
+              -J /zap/wrk/report-api.json \
+              -a || true
+
+            echo ""
+            echo "DAST scan completed. Reports generated:"
+            ls -lh /zap/wrk/
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+# ConfigMap with instructions for extracting results
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dast-instructions
+  namespace: travelo
+data:
+  README.md: |
+    # DAST Scan Results Extraction
+
+    This Job runs OWASP ZAP inside the Kubernetes cluster to scan the deployed application.
+
+    ## How to Run
+
+    ```bash
+    # Apply the Job
+    kubectl apply -f dast-zap-job.yaml
+
+    # Watch the Job progress
+    kubectl get jobs -n travelo -w
+
+    # Check scan logs (real-time)
+    kubectl logs -f job/dast-zap-scan -n travelo
+
+    # Wait for completion (status: Completed)
+    kubectl wait --for=condition=complete --timeout=600s job/dast-zap-scan -n travelo
+    ```
+
+    ## Extract Reports
+
+    ```bash
+    # Get the pod name
+    POD=$(kubectl get pods -n travelo -l job-name=dast-zap-scan -o jsonpath='{.items[0].metadata.name}')
+
+    # Copy reports from the completed pod
+    kubectl cp travelo/$POD:/zap/wrk/report.html ./dast-frontend-report.html
+    kubectl cp travelo/$POD:/zap/wrk/report.json ./dast-frontend-report.json
+    kubectl cp travelo/$POD:/zap/wrk/report-api.html ./dast-backend-report.html
+    kubectl cp travelo/$POD:/zap/wrk/report-api.json ./dast-backend-report.json
+
+    # View reports
+    open dast-frontend-report.html
+    open dast-backend-report.html
+    ```
+
+    ## Cleanup
+
+    ```bash
+    # Delete the Job (auto-cleanup after 1 hour if not deleted)
+    kubectl delete job dast-zap-scan -n travelo
+    ```
+
+    ## What Gets Scanned
+
+    - Frontend: http://frontend:80 (React app)
+    - Backend API: http://backend:8080/api (Spring Boot endpoints)
+
+    ZAP performs baseline passive scanning:
+    - XSS vulnerabilities
+    - CSRF issues
+    - Security headers
+    - Cookie security
+    - Sensitive data exposure
