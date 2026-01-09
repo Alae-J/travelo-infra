@@ -47,6 +47,11 @@ spec:
             echo ""
             echo "DAST scan completed. Reports generated:"
             ls -lh /zap/wrk/
+
+            echo ""
+            echo "Keeping pod alive for report extraction..."
+            echo "Use 'kubectl cp' to extract reports, then delete the Job"
+            sleep 3600  # Keep pod alive for 1 hour
         volumeMounts:
         - name: zap-reports
           mountPath: /zap/wrk
