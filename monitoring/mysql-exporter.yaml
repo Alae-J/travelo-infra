@@ -21,6 +21,13 @@ spec:
           env:
             - name: DATA_SOURCE_NAME
               value: "root:yassine2004@(mysql-service:3306)/"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
 ---
 apiVersion: v1
 kind: Service
