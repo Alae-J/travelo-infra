@@ -47,6 +47,9 @@ spec:
             echo ""
             echo "DAST scan completed. Reports generated:"
             ls -lh /zap/wrk/
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
         resources:
           requests:
             memory: "512Mi"
@@ -54,6 +57,9 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "1000m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
 ---
 # ConfigMap with instructions for extracting results
 apiVersion: v1
