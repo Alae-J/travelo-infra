@@ -29,9 +29,9 @@ spec:
             # Run baseline scan against frontend service
             zap-baseline.py \
               -t http://frontend:80 \
-              -r /zap/wrk/report.html \
-              -w /zap/wrk/report.md \
-              -J /zap/wrk/report.json \
+              -r report.html \
+              -w report.md \
+              -J report.json \
               -a || true
 
             # Also scan backend API
@@ -39,9 +39,9 @@ spec:
             echo "Scanning backend API at http://backend:8080/api"
             zap-baseline.py \
               -t http://backend:8080/api \
-              -r /zap/wrk/report-api.html \
-              -w /zap/wrk/report-api.md \
-              -J /zap/wrk/report-api.json \
+              -r report-api.html \
+              -w report-api.md \
+              -J report-api.json \
               -a || true
 
             echo ""
