@@ -12,6 +12,8 @@ kind: Service
 metadata:
   name: backend
   namespace: travelo
+  labels:
+    app: travelo-backend
 spec:
   selector:
     app: travelo-backend
