@@ -16,11 +16,14 @@ spec:
       containers:
         - name: mysql-exporter
           image: prom/mysqld-exporter:latest
+          args:
+            - "--mysqld.username=root"
+            - "--mysqld.address=mysql:3306"
           ports:
             - containerPort: 9104
           env:
-            - name: DATA_SOURCE_NAME
-              value: "root:yassine2004@(mysql-service:3306)/"
+            - name: MYSQLD_EXPORTER_PASSWORD
+              value: "yassine2004"
           resources:
             requests:
               memory: "64Mi"
