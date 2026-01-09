@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: frontend
   namespace: travelo
+  labels:
+    app: travelo-frontend
 spec:
   selector:
     app: travelo-frontend
